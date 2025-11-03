@@ -1,7 +1,7 @@
 # AGENTS
 
 ## Getting oriented
-- This repo hosts `samber/ro`, a Go implementation of the ReactiveX observable/observer model. All packages rely heavily on Go 1.18+ generics; stick with `go1.20` or newer to run the full module set (`go.work` enumerates optional plugin modules that require newer Go versions).
+- This repo hosts `samber/ro`, a Go implementation of the ReactiveX observable/observer model. All packages rely heavily on Go 1.18+ generics; the project supports Go 1.18 and onwards. Note: some optional plugin modules listed in `go.work` may require newer Go versions.
 - Core developer loops:
   - Build/tests: `go test -race ./...` (or `make test`) is the standard check; benchmarks use `make bench`. `make coverage` produces an HTML report. Linting combines `golangci-lint` and a license header check via `make lint`.
   - Project uses a `go.work` workspace that pulls in numerous plugin submodules and examples. When adding a new package, ensure it is listed in `go.work` if it should build as part of the workspace.
