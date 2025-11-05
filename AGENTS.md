@@ -43,3 +43,40 @@
 - Run `go fmt`/`goimports` on touched Go files; tests and CI expect formatted code.
 - When adding new modules or files, keep the Apache header and follow the established naming (`operator_<category>.go`, `<subject>_test.go`, etc.).
 - Favor existing helper constructors (`NewObserverWithContext`, `NewSubscriberWithConcurrencyMode`, `recoverUnhandledError`) instead of rolling custom versions—the helpers bake in the library’s concurrency and error-handling invariants.
+
+## AI suggestion guidance
+
+When making code suggestions on this repository, prefer simple, idiomatic, and semantics-preserving edits. Do not suggest or introduce no-op observable wrappers that merely forward events and teardown. Instead, return the original `source` when no transformation is required.
+
+Why:
+
+- Avoids unnecessary allocations and call overhead.
+- Preserves the source's concurrency/safety characteristics instead of wrapping them in an `unsafe` wrapper.
+- Makes intent explicit and simplifies review.
+
+Concrete rule:
+
+- If the generated code would look like `return NewUnsafeObservableWithContext(func(subscriberCtx context.Context, destination Observer[T]) Teardown { /* just forwards to source */ })`, prefer `return source` instead.
+
+Small illustrative diff:
+
+diff --git a/operator_math.go b/operator_math.go
+@@
+-			return NewUnsafeObservableWithContext(func(subscriberCtx context.Context, destination Observer[float64]) Teardown {
+-				sub := source.SubscribeWithContext(
+-					subscriberCtx,
+-					NewObserverWithContext(
+-						func(ctx context.Context, value float64) {
+-							destination.NextWithContext(ctx, value)
+-						},
+-						destination.ErrorWithContext,
+-						destination.CompleteWithContext,
+-					),
+-				)
+-				return sub.Unsubscribe
+-			})
++			return source
+
+This guidance applies to both humans and AI assistants generating code for this repository.
+
+```
